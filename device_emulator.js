@@ -6,7 +6,7 @@ const device = awsIoT.device({
   certPath: './certs/certificate.pem',
   caPath: './certs/RootCA1.pem',
   clientId: 'cleaner-' + Math.floor(Math.random() * 1000), // Simulate multiple devices
-  host: 'YOUR_ENDPOINT.iot.REGION.amazonaws.com' // Find in AWS IoT Core Settings
+  host: 'a38j1yxtgtu8ch-ats.iot.eu-north-1.amazonaws.com' // Find in AWS IoT Core Settings
 });
 
 // 2. Embedded device state
