@@ -56,12 +56,43 @@ const device = awsIoT.device({
   host: 'a38j1yxtgtu8ch-ats.iot.eu-north-1.amazonaws.com' // Find in AWS IoT Core Settings
 });
 
-// 2. Embedded device state
-const deviceState = {
-  battery: 100,
-  position: { x: 0, y: 0 },
-  status: 'idle'
-};
+// MQTT command handler for remote control
+device.on('connect', () => {
+  device.subscribe('cleaner/control');
+  publishDeviceInfo();
+  console.log('Connected to AWS IoT and subscribed to cleaner/control');
+});
+
+device.on('message', (topic, payload) => {
+  if (topic === 'cleaner/control') {
+    const command = JSON.parse(payload.toString());
+    handleControlCommand(command);
+  }
+});
+
+function handleControlCommand(command) {
+  if (command.action === 'start_cleaning') {
+    const oldStatus = deviceState.status;
+    deviceState.status = 'cleaning';
+    deviceState.cleaningMode = command.mode || 'auto';
+    deviceState.isCharging = false;
+    publishStatusChange(oldStatus, deviceState.status);
+    console.log('🧹 Cleaning started via MQTT command');
+  }
+  if (command.action === 'pause') {
+    const oldStatus = deviceState.status;
+    deviceState.status = 'paused';
+    publishStatusChange(oldStatus, deviceState.status);
+    console.log('⏸️ Cleaning paused via MQTT command');
+  }
+  if (command.action === 'dock') {
+    const oldStatus = deviceState.status;
+    deviceState.status = 'returning';
+    publishStatusChange(oldStatus, deviceState.status);
+    console.log('🏠 Returning to dock via MQTT command');
+  }
+  // Add more actions as needed
+}
 
 // 3. Simulate sensor readings (like real hardware would)
 function simulateSensors() {
@@ -256,4 +287,7 @@ console.log(`🚀 Starting Smart Cleaner Simulator - Device ID: ${deviceState.de
 setInterval(() => {
   simulateSensors();
   publishTelemetry();
-}, 2000); // Match your hardware's telemetry interval
+  checkSchedule();
+  checkMaintenance();
+  console.log(`[${new Date().toISOString()}] Telemetry sent:`, deviceState.status, deviceState.battery);
+}, 2000);
