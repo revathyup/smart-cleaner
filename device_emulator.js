@@ -91,7 +91,7 @@ function handleControlCommand(command) {
     publishStatusChange(oldStatus, deviceState.status);
     console.log('🏠 Returning to dock via MQTT command');
   }
-  // Add more actions as needed
+  // Can Add more actions as needed
 }
 
 // 3. Simulate sensor readings (like real hardware would)
